@@ -233,7 +233,7 @@ def download_paper(
         else:
             with open(csv_file_path, newline='') as csvfile:
                 myreader = csv.DictReader(csvfile, delimiter=',')
-                total_paper_number = sum(1 for row in myreader)
+                total_paper_number = len(myreader)
 
         download_from_csv(
             year=year,
@@ -257,7 +257,7 @@ def download_paper(
         else:
             with open(csv_file_path, newline='') as csvfile:
                 myreader = csv.DictReader(csvfile, delimiter=',')
-                total_paper_number = sum(1 for row in myreader)
+                total_paper_number = len(myreader)
         download_from_csv(
             year=year,
             conference=conference,
@@ -274,25 +274,3 @@ def download_paper(
 if __name__ == '__main__':
     year = 2023
     conference = 'CVPR'
-    # download_paper(
-    #     year,
-    #     conference=conference,
-    #     save_dir=fr'E:\{conference}',
-    #     is_download_main_paper=True,
-    #     is_download_supplement=True,
-    #     time_step_in_seconds=5,
-    #     is_download_main_conference=True,
-    #     is_download_workshops=False
-    # )
-    #
-    # move_main_and_supplement_2_one_directory(
-    #     main_path=rf'E:\{conference}\{conference}_{year}\main_paper',
-    #     supplement_path=rf'E:\{conference}\{conference}_{year}\supplement',
-    #     supp_pdf_save_path=rf'E:\{conference}\{conference}_{year}\main_paper'
-    # )
-    # move_main_and_supplement_2_one_directory_with_group(
-    #     main_path=rf'E:\{conference}\{conference}_WS_{year}\main_paper',
-    #     supplement_path=rf'E:\{conference}\{conference}_WS_{year}\supplement',
-    #     supp_pdf_save_path=rf'E:\{conference}\{conference}_WS_{year}\main_paper'
-    # )
-    pass

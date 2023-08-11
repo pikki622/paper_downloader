@@ -51,9 +51,9 @@ def download_paper(year, save_dir, is_download_supplement=True, time_step_in_sec
         2005: 5
 
     }
-    if year in AISTATS_year_dict.keys():
+    if year in AISTATS_year_dict:
         volume = f'v{AISTATS_year_dict[year]}'
-    elif year in AISTATS_year_dict_R.keys():
+    elif year in AISTATS_year_dict_R:
         volume = f'r{AISTATS_year_dict_R[year]}'
     else:
         raise ValueError('''the given year's url is unknown !''')
@@ -78,9 +78,3 @@ if __name__ == '__main__':
         time_step_in_seconds=5,
         downloader='IDM'
     )
-    # move_main_and_supplement_2_one_directory(
-    #     main_path=rf'D:\AISTATS_{year}\main_paper',
-    #     supplement_path=rf'D:\AISTATS_{year}\supplement',
-    #     supp_pdf_save_path=rf'D:\AISTATS_{year}\supplement_pdf'
-    # )
-    pass

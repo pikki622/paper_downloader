@@ -16,7 +16,7 @@ def get_paper_name_link_from_url(url):
     headers = {
         'User-Agent':
             'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:23.0) Gecko/20100101 Firefox/23.0'}
-    paper_dict = dict()
+    paper_dict = {}
     req = urllib.request.Request(url=url, headers=headers)
     content = urllib.request.urlopen(req, timeout=10).read()
     soup = BeautifulSoup(content, 'html5lib')

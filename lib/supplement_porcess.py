@@ -26,22 +26,26 @@ def get_potential_supp_pdf(path):
     :return: supp_pdf_list, List of str, pdf files' full pathnames
     """
     supp_pdf_list = [f for f in os.scandir(path) if f.name.endswith('.pdf')]
-    if len(supp_pdf_list) == 0:
+    if not supp_pdf_list:
         supp_pdf_list = []
         for dir in os.scandir(path):
             if dir.is_dir() and not dir.name.startswith('__'):
-                for pdf in os.scandir(dir.path):
-                    if pdf.name.endswith('.pdf'):
-                        supp_pdf_list.append(pdf.path)
-    if len(supp_pdf_list) == 0:
+                supp_pdf_list.extend(
+                    pdf.path
+                    for pdf in os.scandir(dir.path)
+                    if pdf.name.endswith('.pdf')
+                )
+    if not supp_pdf_list:
         supp_pdf_list = []
         for dir in os.scandir(path):
             if dir.is_dir() and not dir.name.startswith('__'):
                 for sub_dir in os.scandir(dir):
                     if sub_dir.is_dir() and not sub_dir.name.startswith('__'):
-                        for pdf in os.scandir(sub_dir.path):
-                            if pdf.name.endswith('.pdf'):
-                                supp_pdf_list.append(pdf.path)
+                        supp_pdf_list.extend(
+                            pdf.path
+                            for pdf in os.scandir(sub_dir.path)
+                            if pdf.name.endswith('.pdf')
+                        )
     return supp_pdf_list
 
 
@@ -70,14 +74,14 @@ def move_main_and_supplement_2_one_directory_with_group(main_path, supplement_pa
             if os.path.isdir(os.path.join(temp_zip_dir, unzip_file)):
                 shutil.rmtree(os.path.join(temp_zip_dir, unzip_file))
             else:
-                print('Cannot Remove - ' + os.path.join(temp_zip_dir, unzip_file))
+                print(f'Cannot Remove - {os.path.join(temp_zip_dir, unzip_file)}')
     for group in os.scandir(main_path):
         if group.is_dir():
             paper_bar = tqdm(os.scandir(group.path))
             for paper in paper_bar:
                 if paper.is_file():
                     name, extension = os.path.splitext(paper.name)
-                    if '.pdf' == extension:
+                    if extension == '.pdf':
                         paper_bar.set_description(f'''processing {name}''')
                         supp_pdf_path = None
                         # error_flag = False
@@ -92,7 +96,7 @@ def move_main_and_supplement_2_one_directory_with_group(main_path, supplement_pa
                                     save_path=temp_zip_dir
                                 )
                             except Exception as e:
-                                print('Error: ' + name + ' - ' + str(e))
+                                print(f'Error: {name} - {str(e)}')
                                 error_log.append((paper.path, supp_pdf_path, str(e)))
                             try:
                                 # find if there is a pdf file (by listing all files in the dir)
@@ -100,13 +104,20 @@ def move_main_and_supplement_2_one_directory_with_group(main_path, supplement_pa
                                 # rename the first pdf file
                                 if len(supp_pdf_list) >= 1:
                                     # by default, we only deal with the first pdf
-                                    supp_pdf_path = os.path.join(supp_pdf_save_path, group.name, name+'_supp.pdf')
+                                    supp_pdf_path = os.path.join(
+                                        supp_pdf_save_path,
+                                        group.name,
+                                        f'{name}_supp.pdf',
+                                    )
                                     if not os.path.exists(supp_pdf_path):
                                         shutil.move(supp_pdf_list[0], supp_pdf_path)
                                     if len(supp_pdf_list) > 1:
                                         for i in range(1, len(supp_pdf_list)):
                                             supp_pdf_path = os.path.join(
-                                                supp_pdf_save_path, group.name, name + f'_supp_{i}.pdf')
+                                                supp_pdf_save_path,
+                                                group.name,
+                                                f'{name}_supp_{i}.pdf',
+                                            )
                                             if not os.path.exists(supp_pdf_path):
                                                 shutil.move(supp_pdf_list[i], supp_pdf_path)
                                 # empty the temp_folder (both the dirs and files)
@@ -116,9 +127,9 @@ def move_main_and_supplement_2_one_directory_with_group(main_path, supplement_pa
                                     elif os.path.isdir(os.path.join(temp_zip_dir, unzip_file)):
                                         shutil.rmtree(os.path.join(temp_zip_dir, unzip_file))
                                     else:
-                                        print('Cannot Remove - ' + os.path.join(temp_zip_dir, unzip_file))
+                                        print(f'Cannot Remove - {os.path.join(temp_zip_dir, unzip_file)}')
                             except Exception as e:
-                                print('Error: ' + name + ' - ' + str(e))
+                                print(f'Error: {name} - {str(e)}')
                                 error_log.append((paper.path, supp_pdf_path, str(e)))
 
     # 2. write error log
@@ -161,13 +172,13 @@ def move_main_and_supplement_2_one_directory(main_path, supplement_path, supp_pd
             if os.path.isdir(os.path.join(temp_zip_dir, unzip_file)):
                 shutil.rmtree(os.path.join(temp_zip_dir, unzip_file))
             else:
-                print('Cannot Remove - ' + os.path.join(temp_zip_dir, unzip_file))
+                print(f'Cannot Remove - {os.path.join(temp_zip_dir, unzip_file)}')
 
     paper_bar = tqdm(os.scandir(main_path))
     for paper in paper_bar:
         if paper.is_file():
             name, extension = os.path.splitext(paper.name)
-            if '.pdf' == extension:
+            if extension == '.pdf':
                 paper_bar.set_description(f'''processing {name}''')
                 supp_pdf_path = None
                 # error_flag = False
@@ -182,7 +193,7 @@ def move_main_and_supplement_2_one_directory(main_path, supplement_path, supp_pd
                             zip_file=os.path.join(supplement_path, f'{name}_supp.zip'),
                             save_path=temp_zip_dir)
                     except Exception as e:
-                        print('Error: ' + name + ' - ' + str(e))
+                        print(f'Error: {name} - {str(e)}')
                         error_log.append((paper.path, supp_pdf_path, str(e)))
                     try:
                         # find if there is a pdf file (by listing all files in the dir)
@@ -191,12 +202,12 @@ def move_main_and_supplement_2_one_directory(main_path, supplement_path, supp_pd
                         # rename the first pdf file
                         if len(supp_pdf_list) >= 1:
                             # by default, we only deal with the first pdf
-                            supp_pdf_path = os.path.join(supp_pdf_save_path, name+'_supp.pdf')
+                            supp_pdf_path = os.path.join(supp_pdf_save_path, f'{name}_supp.pdf')
                             if not os.path.exists(supp_pdf_path):
                                 shutil.move(supp_pdf_list[0], supp_pdf_path)
                             if len(supp_pdf_list) > 1:
                                 for i in range(1, len(supp_pdf_list)):
-                                    supp_pdf_path = os.path.join(supp_pdf_save_path, name + f'_supp_{i}.pdf')
+                                    supp_pdf_path = os.path.join(supp_pdf_save_path, f'{name}_supp_{i}.pdf')
                                     if not os.path.exists(supp_pdf_path):
                                         shutil.move(supp_pdf_list[i], supp_pdf_path)
                         # empty the temp_folder (both the dirs and files)
@@ -206,9 +217,9 @@ def move_main_and_supplement_2_one_directory(main_path, supplement_path, supp_pd
                             elif os.path.isdir(os.path.join(temp_zip_dir, unzip_file)):
                                 shutil.rmtree(os.path.join(temp_zip_dir, unzip_file))
                             else:
-                                print('Cannot Remove - ' + os.path.join(temp_zip_dir, unzip_file))
+                                print(f'Cannot Remove - {os.path.join(temp_zip_dir, unzip_file)}')
                     except Exception as e:
-                        print('Error: ' + name + ' - ' + str(e))
+                        print(f'Error: {name} - {str(e)}')
                         error_log.append((paper.path, supp_pdf_path, str(e)))
 
     # 2. write error log
@@ -251,12 +262,12 @@ def merge_main_supplement(main_path, supplement_path, save_path, is_delete_ori_f
             if os.path.isdir(os.path.join(temp_zip_dir, unzip_file)):
                 shutil.rmtree(os.path.join(temp_zip_dir, unzip_file))
             else:
-                print('Cannot Remove - ' + os.path.join(temp_zip_dir, unzip_file))
+                print(f'Cannot Remove - {os.path.join(temp_zip_dir, unzip_file)}')
     paper_bar = tqdm(os.scandir(main_path))
     for paper in paper_bar:
         if paper.is_file():
             name, extension = os.path.splitext(paper.name)
-            if '.pdf' == extension:
+            if extension == '.pdf':
                 paper_bar.set_description(f'''processing {name}''')
                 if os.path.exists(os.path.join(save_path, paper.name)):
                     continue
@@ -271,7 +282,7 @@ def merge_main_supplement(main_path, supplement_path, save_path, is_delete_ori_f
                             save_path=temp_zip_dir
                         )
                     except Exception as e:
-                        print('Error: ' + name + ' - ' + str(e))
+                        print(f'Error: {name} - {str(e)}')
                         error_log.append((paper.path, supp_pdf_path, str(e)))
                     try:
                         # find if there is a pdf file (by listing all files in the dir)
@@ -279,7 +290,7 @@ def merge_main_supplement(main_path, supplement_path, save_path, is_delete_ori_f
                         # rename the first pdf file
                         if len(supp_pdf_list) >= 1:
                             # by default, we only deal with the first pdf
-                            supp_pdf_path = os.path.join(supplement_path, name+'_supp.pdf')
+                            supp_pdf_path = os.path.join(supplement_path, f'{name}_supp.pdf')
                             if not os.path.exists(supp_pdf_path):
                                 shutil.move(supp_pdf_list[0], supp_pdf_path)
                         # empty the temp_folder (both the dirs and files)
@@ -289,10 +300,10 @@ def merge_main_supplement(main_path, supplement_path, save_path, is_delete_ori_f
                             elif os.path.isdir(os.path.join(temp_zip_dir, unzip_file)):
                                 shutil.rmtree(os.path.join(temp_zip_dir, unzip_file))
                             else:
-                                print('Cannot Remove - ' + os.path.join(temp_zip_dir, unzip_file))
+                                print(f'Cannot Remove - {os.path.join(temp_zip_dir, unzip_file)}')
                     except Exception as e:
                         error_floa = True
-                        print('Error: ' + name + ' - ' + str(e))
+                        print(f'Error: {name} - {str(e)}')
                         error_log.append((paper.path, supp_pdf_path, str(e)))
                         # empty the temp_folder (both the dirs and files)
                         for unzip_file in os.listdir(temp_zip_dir):
@@ -301,19 +312,18 @@ def merge_main_supplement(main_path, supplement_path, save_path, is_delete_ori_f
                             elif os.path.isdir(os.path.join(temp_zip_dir, unzip_file)):
                                 shutil.rmtree(os.path.join(temp_zip_dir, unzip_file))
                             else:
-                                print('Cannot Remove - ' + os.path.join(temp_zip_dir, unzip_file))
+                                print(f'Cannot Remove - {os.path.join(temp_zip_dir, unzip_file)}')
                         continue
                 if supp_pdf_path is not None:
                     try:
                         merger = PdfFileMerger()
-                        f_handle1 = open(paper.path, 'rb')
-                        merger.append(f_handle1)
-                        f_handle2 = open(supp_pdf_path, 'rb')
-                        merger.append(f_handle2)
-                        with open(os.path.join(save_path, paper.name), 'wb') as fout:
-                            merger.write(fout)
-                            print('\tmerged!')
-                        f_handle1.close()
+                        with open(paper.path, 'rb') as f_handle1:
+                            merger.append(f_handle1)
+                            f_handle2 = open(supp_pdf_path, 'rb')
+                            merger.append(f_handle2)
+                            with open(os.path.join(save_path, paper.name), 'wb') as fout:
+                                merger.write(fout)
+                                print('\tmerged!')
                         f_handle2.close()
                         merger.close()
                         if is_delete_ori_files:
@@ -323,16 +333,15 @@ def merge_main_supplement(main_path, supplement_path, save_path, is_delete_ori_f
                             if os.path.exists(os.path.join(supplement_path, f'{name}_supp.pdf')):
                                 os.remove(os.path.join(supplement_path, f'{name}_supp.pdf'))
                     except Exception as e:
-                        print('Error: ' + name + ' - ' + str(e))
+                        print(f'Error: {name} - {str(e)}')
                         error_log.append((paper.path, supp_pdf_path, str(e)))
                         if os.path.exists(os.path.join(save_path, paper.name)):
                             os.remove(os.path.join(save_path, paper.name))
 
+                elif is_delete_ori_files:
+                    shutil.move(paper.path, os.path.join(save_path, paper.name))
                 else:
-                    if is_delete_ori_files:
-                        shutil.move(paper.path, os.path.join(save_path, paper.name))
-                    else:
-                        shutil.copyfile(paper.path, os.path.join(save_path, paper.name))
+                    shutil.copyfile(paper.path, os.path.join(save_path, paper.name))
 
     # 2. write error log
     print('write error log')

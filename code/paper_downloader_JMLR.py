@@ -61,7 +61,7 @@ def download_paper(
     elif url is not None:
         req = urllib.request.Request(url=url, headers=headers)
         content = urllib.request.urlopen(req, timeout=10).read()
-        postfix = f'JMLR'
+        postfix = 'JMLR'
     else:
         raise ValueError(''''url' could not be None when 'is_use_url'=True!!!''')
     # soup = BeautifulSoup(content, 'html.parser')
@@ -89,20 +89,22 @@ def download_paper(
 
         # get abstract page url
         links = this_paper.find_all('a')
-        main_link = None
-        for link in links:
-            if '[pdf]' == link.text or 'pdf' == link.text:
-                main_link = urllib.parse.urljoin('http://jmlr.org', link.get('href'))
-                break
-
+        main_link = next(
+            (
+                urllib.parse.urljoin('http://jmlr.org', link.get('href'))
+                for link in links
+                if link.text in ['[pdf]', 'pdf']
+            ),
+            None,
+        )
         # try 1 time
         # error_flag = False
-        for d_iter in range(1):
+        for _ in range(1):
             try:
                 # download paper with IDM
                 if not os.path.exists(this_paper_main_path) and main_link is not None:
                     try:
-                        print('Downloading paper {}/{}: {}'.format(paper[1] + 1, num_download, title))
+                        print(f'Downloading paper {paper[1] + 1}/{num_download}: {title}')
                     except:
                         print(title.encode('utf8'))
                     downloader.download(
@@ -112,7 +114,7 @@ def download_paper(
                     )
             except Exception as e:
                 # error_flag = True
-                print('Error: ' + title + ' - ' + str(e))
+                print(f'Error: {title} - {str(e)}')
                 error_log.append((title, main_link, 'main paper download error', str(e)))
 
     # store the results
@@ -162,13 +164,16 @@ def download_special_topics_and_issues_paper(save_dir, time_step_in_seconds=5, d
     is_topic = False
     is_issue = False
     for topic in all_topics:
-        if 'h2' == topic.name and slugify(topic.text.strip()) == 'special-topics':
+        if (
+            topic.name == 'h2'
+            and slugify(topic.text.strip()) == 'special-topics'
+        ):
             is_topic = True
-        elif 'h2' == topic.name:
+        elif topic.name == 'h2':
             is_topic = False
-            if 'special-issues' == slugify(topic.text.strip()):
+            if slugify(topic.text.strip()) == 'special-issues':
                 is_issue = True
-        if is_topic and 'p' == topic.name:
+        if is_topic and topic.name == 'p':
             topic_name = slugify(topic.text.strip())
             topic_url = urllib.parse.urljoin(homepage, topic.a.get('href'))
             # print(f'T: {topic_name} url:{topic_url}')
@@ -182,7 +187,7 @@ def download_special_topics_and_issues_paper(save_dir, time_step_in_seconds=5, d
                 is_use_url=True
             )
             time.sleep(time_step_in_seconds)
-        if is_issue and 'p' == topic.name:
+        if is_issue and topic.name == 'p':
             issue_name = slugify(topic.text.strip())
             issue_url = urllib.parse.urljoin(homepage, topic.a.get('href'))
             # print(f'T: {issue_name} url:{issue_url}')
@@ -202,6 +207,3 @@ if __name__ == '__main__':
     volumn = 24
     download_paper(volumn, rf'W:\all_papers\JMLR\JMLR_v{volumn}',
                    time_step_in_seconds=3)
-    # download_special_topics_and_issues_paper(
-    #     rf'Z:\all_papers\JMLR', time_step_in_seconds=3, downloader='IDM')
-    pass

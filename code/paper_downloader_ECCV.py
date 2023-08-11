@@ -41,8 +41,12 @@ def save_csv(year):
                 'Gecko/20100101 Firefox/23.0'}
         dat_file_pathname = os.path.join(
             project_root_folder, 'urls', f'init_url_ECCV_{year}.dat')
+        paper_index = 0
+        paper_dict = {'title': '',
+                      'main link': '',
+                      'supplemental link': ''}
         if year >= 2018:
-            init_url = f'https://www.ecva.net/papers.php'
+            init_url = 'https://www.ecva.net/papers.php'
             if os.path.exists(dat_file_pathname):
                 with open(dat_file_pathname, 'rb') as f:
                     content = pickle.load(f)
@@ -55,33 +59,31 @@ def save_csv(year):
                     pickle.dump(content, f)
             soup = BeautifulSoup(content, 'html5lib')
             paper_list_bar = tqdm(soup.find_all(['dt', 'dd']))
-            paper_index = 0
-            paper_dict = {'title': '',
-                          'main link': '',
-                          'supplemental link': ''}
             for paper in paper_list_bar:
                 is_new_paper = False
 
                 # get title
                 try:
-                    if 'dt' == paper.name and \
-                            'ptitle' == paper.get('class')[0] and \
-                            year == int(paper.a.get('href').split('_')[1][:4]):  # title:
+                    if (
+                        paper.name == 'dt'
+                        and paper.get('class')[0] == 'ptitle'
+                        and year == int(paper.a.get('href').split('_')[1][:4])
+                    ):  # title:
                         # this_year = int(paper.a.get('href').split('_')[1][:4])
                         title = slugify(paper.text.strip())
                         paper_dict['title'] = title
                         paper_index += 1
                         paper_list_bar.set_description_str(
                             f'Downloading paper {paper_index}: {title}')
-                    elif '' != paper_dict['title'] and 'dd' == paper.name:
+                    elif paper_dict['title'] != '' and paper.name == 'dd':
                         all_as = paper.find_all('a')
                         for a in all_as:
-                            if 'pdf' == slugify(a.text.strip()):
+                            if slugify(a.text.strip()) == 'pdf':
                                 main_link = urllib.parse.urljoin(init_url,
                                                                  a.get('href'))
                                 paper_dict['main link'] = main_link
                                 is_new_paper = True
-                            elif 'supp' == slugify(a.text.strip())[:4]:
+                            elif slugify(a.text.strip())[:4] == 'supp':
                                 supp_link = urllib.parse.urljoin(init_url,
                                                                  a.get('href'))
                                 paper_dict['supplemental link'] = supp_link
@@ -108,10 +110,6 @@ def save_csv(year):
             soup = BeautifulSoup(content, 'html5lib')
             paper_list_bar = tqdm(
                 soup.find('div', {'class': 'entry-content'}).find_all(['p']))
-            paper_index = 0
-            paper_dict = {'title': '',
-                          'main link': '',
-                          'supplemental link': ''}
             for paper in paper_list_bar:
                 try:
                     if len(paper.find_all(['strong'])) and len(
@@ -176,7 +174,7 @@ def download_from_springer(
         year, save_dir, is_workshops=False, time_sleep_in_seconds=5,
         downloader='IDM'):
     os.makedirs(save_dir, exist_ok=True)
-    if 2018 == year:
+    if year == 2018:
         if not is_workshops:
             urls_list = [
                 'https://link.springer.com/book/10.1007/978-3-030-01246-5',
@@ -205,7 +203,7 @@ def download_from_springer(
                 'https://link.springer.com/book/10.1007/978-3-030-11021-5',
                 'https://link.springer.com/book/10.1007/978-3-030-11024-6'
             ]
-    elif 2016 == year:
+    elif year == 2016:
         if not is_workshops:
             urls_list = [
                 'https://link.springer.com/book/10.1007%2F978-3-319-46448-0',
@@ -223,7 +221,7 @@ def download_from_springer(
                 'https://link.springer.com/book/10.1007%2F978-3-319-48881-3',
                 'https://link.springer.com/book/10.1007%2F978-3-319-49409-8'
             ]
-    elif 2014 == year:
+    elif year == 2014:
         if not is_workshops:
             urls_list = [
                 'https://link.springer.com/book/10.1007/978-3-319-10590-1',
@@ -241,7 +239,7 @@ def download_from_springer(
                 'https://link.springer.com/book/10.1007/978-3-319-16199-0',
                 'https://link.springer.com/book/10.1007/978-3-319-16220-1'
             ]
-    elif 2012 == year:
+    elif year == 2012:
         if not is_workshops:
             urls_list = [
                 'https://link.springer.com/book/10.1007/978-3-642-33718-5',
@@ -258,7 +256,7 @@ def download_from_springer(
                 'https://link.springer.com/book/10.1007/978-3-642-33868-7',
                 'https://link.springer.com/book/10.1007/978-3-642-33885-4'
             ]
-    elif 2010 == year:
+    elif year == 2010:
         if not is_workshops:
             urls_list = [
                 'https://link.springer.com/book/10.1007/978-3-642-15549-9',
@@ -273,7 +271,7 @@ def download_from_springer(
                 'https://link.springer.com/book/10.1007/978-3-642-35749-7',
                 'https://link.springer.com/book/10.1007/978-3-642-35740-4'
             ]
-    elif 2008 == year:
+    elif year == 2008:
         if not is_workshops:
             urls_list = [
                 'https://link.springer.com/book/10.1007/978-3-540-88682-2',
@@ -283,7 +281,7 @@ def download_from_springer(
             ]
         else:
             urls_list = []
-    elif 2006 == year:
+    elif year == 2006:
         if not is_workshops:
             urls_list = [
                 'https://link.springer.com/book/10.1007/11744023',
@@ -295,7 +293,7 @@ def download_from_springer(
             urls_list = [
                 'https://link.springer.com/book/10.1007/11754336'
             ]
-    elif 2004 == year:
+    elif year == 2004:
         if not is_workshops:
             urls_list = [
                 'https://link.springer.com/book/10.1007/b97865',
@@ -307,7 +305,7 @@ def download_from_springer(
             urls_list = [
 
             ]
-    elif 2002 == year:
+    elif year == 2002:
         if not is_workshops:
             urls_list = [
                 'https://link.springer.com/book/10.1007/3-540-47969-4',
@@ -319,7 +317,7 @@ def download_from_springer(
             urls_list = [
 
             ]
-    elif 2000 == year:
+    elif year == 2000:
         if not is_workshops:
             urls_list = [
                 'https://link.springer.com/book/10.1007/3-540-45054-8',
@@ -329,7 +327,7 @@ def download_from_springer(
             urls_list = [
 
             ]
-    elif 1998 == year:
+    elif year == 1998:
         if not is_workshops:
             urls_list = [
                 'https://link.springer.com/book/10.1007/BFb0055655',
@@ -339,7 +337,7 @@ def download_from_springer(
             urls_list = [
 
             ]
-    elif 1996 == year:
+    elif year == 1996:
         if not is_workshops:
             urls_list = [
                 'https://link.springer.com/book/10.1007/BFb0015518',
@@ -349,7 +347,7 @@ def download_from_springer(
             urls_list = [
 
             ]
-    elif 1994 == year:
+    elif year == 1994:
         if not is_workshops:
             urls_list = [
                 'https://link.springer.com/book/10.1007/3-540-57956-7',
@@ -359,7 +357,7 @@ def download_from_springer(
             urls_list = [
 
             ]
-    elif 1992 == year:
+    elif year == 1992:
         if not is_workshops:
             urls_list = [
                 'https://link.springer.com/book/10.1007/3-540-55426-2'
@@ -368,7 +366,7 @@ def download_from_springer(
             urls_list = [
 
             ]
-    elif 1990 == year:
+    elif year == 1990:
         if not is_workshops:
             urls_list = [
                 'https://link.springer.com/book/10.1007/BFb0014843'
@@ -390,12 +388,12 @@ def __download_from_springer(
         url, save_dir, year, is_workshops=False, time_sleep_in_seconds=5,
         downloader='IDM'):
     downloader = Downloader(downloader)
-    for i in range(3):
+    for _ in range(3):
         try:
             papers_dict = springer.get_paper_name_link_from_url(url)
             break
         except Exception as e:
-            print(str(e))
+            print(e)
     # total_paper_number = len(papers_dict)
     pbar = tqdm(papers_dict.keys())
     postfix = f'ECCV_{year}'

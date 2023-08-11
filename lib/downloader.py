@@ -18,7 +18,7 @@ def _download(urls, save_path, time_sleep_in_seconds=5):
     """
     r = requests.get(urls, stream=True)
     head, tail = os.path.split(save_path)
-    if '' != head:
+    if head != '':
         os.makedirs(head, exist_ok=True)
 
     with open(save_path, 'wb') as f:

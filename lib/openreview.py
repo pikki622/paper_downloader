@@ -53,13 +53,12 @@ def __download_papers_given_divs(driver, divs, save_dir, paper_postfix,
 
         # name = slugify(paper.find_element_by_class_name('note_content_title').text)
         # link = paper.find_element_by_class_name('note_content_pdf').get_attribute('href')
-        pdf_name = name + '_' + paper_postfix + '.pdf'
+        pdf_name = f'{name}_{paper_postfix}.pdf'
         if not os.path.exists(os.path.join(save_dir, pdf_name)):
-            print('Downloading paper {}/{}: {}'.format(index + 1, num_papers,
-                                                       name))
+            print(f'Downloading paper {index + 1}/{num_papers}: {name}')
             # try 1 times
             success_flag = False
-            for d_iter in range(1):
+            for _ in range(1):
                 try:
                     downloader.download(
                         urls=link,
@@ -69,7 +68,7 @@ def __download_papers_given_divs(driver, divs, save_dir, paper_postfix,
                     success_flag = True
                     break
                 except Exception as e:
-                    print('Error: ' + name + ' - ' + str(e))
+                    print(f'Error: {name} - {str(e)}')
             if not success_flag:
                 error_log.append((name, link))
     return error_log
@@ -458,8 +457,11 @@ def download_icml_papers_given_url_and_group_id(
         # res = wait.until(EC.presence_of_element_located(
         #     (By.XPATH, f'''//*[@id="{group_id}"]/nav''')))
         if aria_controls is None:
-            wait.until(EC.element_to_be_clickable(
-                (By.XPATH, f'//*[@class="submissions-list"]/nav/ul/li[3]/a''')))
+            wait.until(
+                EC.element_to_be_clickable(
+                    (By.XPATH, '//*[@class="submissions-list"]/nav/ul/li[3]/a')
+                )
+            )
         else:
             wait.until(EC.element_to_be_clickable(
                 (By.XPATH,
@@ -489,8 +491,7 @@ def download_icml_papers_given_url_and_group_id(
     mywait(driver)
 
     # get into poster or oral page
-    nav_tap = driver.find_elements(
-        By.XPATH, f'//ul[@class="nav nav-tabs"]/li')
+    nav_tap = driver.find_elements(By.XPATH, '//ul[@class="nav nav-tabs"]/li')
     is_found_group = False
     for li in nav_tap:
         if group_id in li.text.lower():

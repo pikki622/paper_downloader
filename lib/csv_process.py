@@ -63,17 +63,24 @@ def download_from_csv(
                 this_paper_supp_path_no_ext = os.path.join(supplement_save_path, f'{title}_{postfix}_supp.')
                 if is_grouped:
                     this_paper_supp_path_no_ext = os.path.join(supplement_save_path, group, f'{title}_{postfix}_supp.')
-                if '' != this_paper['supplemental link'] and os.path.exists(this_paper_main_path) and \
-                        (os.path.exists(this_paper_supp_path_no_ext + 'zip') or os.path.exists(
-                            this_paper_supp_path_no_ext + 'pdf')):
+                if (
+                    this_paper['supplemental link'] != ''
+                    and os.path.exists(this_paper_main_path)
+                    and (
+                        os.path.exists(f'{this_paper_supp_path_no_ext}zip')
+                        or os.path.exists(f'{this_paper_supp_path_no_ext}pdf')
+                    )
+                ):
                     continue
-                elif '' == this_paper['supplemental link'] and os.path.exists(this_paper_main_path):
+                elif this_paper['supplemental link'] == '' and os.path.exists(
+                    this_paper_main_path
+                ):
                     continue
             elif os.path.exists(this_paper_main_path):
                     continue
-            if 'error' == this_paper['main link']:
+            if this_paper['main link'] == 'error':
                 error_log.append((title, 'no MAIN link'))
-            elif '' != this_paper['main link']:
+            elif this_paper['main link'] != '':
                 if is_grouped:
                     if is_download_main_paper:
                         os.makedirs(os.path.join(main_save_path, group), exist_ok=True)
@@ -90,16 +97,18 @@ def download_from_csv(
                             )
                     except Exception as e:
                         # error_flag = True
-                        print('Error: ' + title + ' - ' + str(e))
+                        print(f'Error: {title} - {str(e)}')
                         error_log.append((title, this_paper['main link'], 'main paper download error', str(e)))
                 # download supp
                 if is_download_supplement:
                     # check whether the supp can be downloaded
-                    if not (os.path.exists(this_paper_supp_path_no_ext + 'zip') or
-                            os.path.exists(this_paper_supp_path_no_ext + 'pdf')):
-                        if 'error' == this_paper['supplemental link']:
+                    if not (
+                        os.path.exists(f'{this_paper_supp_path_no_ext}zip')
+                        or os.path.exists(f'{this_paper_supp_path_no_ext}pdf')
+                    ):
+                        if this_paper['supplemental link'] == 'error':
                             error_log.append((title, 'no SUPPLEMENTAL link'))
-                        elif '' != this_paper['supplemental link']:
+                        elif this_paper['supplemental link'] != '':
                             supp_type = this_paper['supplemental link'].split('.')[-1]
                             try:
                                 downloader.download(
@@ -109,16 +118,16 @@ def download_from_csv(
                                 )
                             except Exception as e:
                                 # error_flag = True
-                                print('Error: ' + title + ' - ' + str(e))
+                                print(f'Error: {title} - {str(e)}')
                                 error_log.append((title, this_paper['supplemental link'], 'supplement download error',
                                                   str(e)))
                 # download bibtex file
                 if is_download_bib:
-                    bib_path = this_paper_main_path[:-3] + 'bib'
+                    bib_path = f'{this_paper_main_path[:-3]}bib'
                     if not os.path.exists(bib_path):
-                        if 'error' == this_paper['bib']:
+                        if this_paper['bib'] == 'error':
                             error_log.append((title, 'no bibtex link'))
-                        elif '' != this_paper['bib']:
+                        elif this_paper['bib'] != '':
                             try:
                                 downloader.download(
                                     urls=this_paper['bib'],
@@ -127,7 +136,7 @@ def download_from_csv(
                                 )
                             except Exception as e:
                                 # error_flag = True
-                                print('Error: ' + title + ' - ' + str(e))
+                                print(f'Error: {title} - {str(e)}')
                                 error_log.append((title, this_paper['bib'], 'bibtex download error',
                                                   str(e)))
 

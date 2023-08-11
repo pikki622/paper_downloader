@@ -39,12 +39,12 @@ def __download_papers_given_divs(divs, save_dir, paper_postfix,
                 paper.find_element_by_class_name('note_content_title').text)
             link = paper.find_element_by_class_name(
                 'note_content_pdf').get_attribute('href')
-        print('Downloading paper {}/{}: {}'.format(index + 1, num_papers, name))
-        pdf_name = name + '_' + paper_postfix + '.pdf'
+        print(f'Downloading paper {index + 1}/{num_papers}: {name}')
+        pdf_name = f'{name}_{paper_postfix}.pdf'
         if not os.path.exists(os.path.join(save_dir, pdf_name)):
             # try 1 times
             success_flag = False
-            for d_iter in range(1):
+            for _ in range(1):
                 try:
                     downloader.download(
                         urls=link,
@@ -54,7 +54,7 @@ def __download_papers_given_divs(divs, save_dir, paper_postfix,
                     success_flag = True
                     break
                 except Exception as e:
-                    print('Error: ' + name + ' - ' + str(e))
+                    print(f'Error: {name} - {str(e)}')
             if not success_flag:
                 error_log.append((name, link))
     return error_log
@@ -105,7 +105,6 @@ def download_iclr_oral_papers(save_dir, year, base_url=None,
                        '2022/Conference#oral-submissions'
         else:
             raise ValueError('the website url is not given for this year!')
-    first_poster_index = {'2017': 15}
     paper_postfix = f'ICLR_{year}'
     error_log = []
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
@@ -172,8 +171,7 @@ def download_iclr_oral_papers(save_dir, year, base_url=None,
                 time_step_in_seconds=time_step_in_seconds,
                 downloader=downloader
             )
-            for e in this_error_log:
-                error_log.append(e)
+            error_log.extend(iter(this_error_log))
     elif year == 2021:
         divs = driver.find_elements_by_xpath(
             '//*[@id="oral-presentations"]/ul/li')
@@ -183,6 +181,7 @@ def download_iclr_oral_papers(save_dir, year, base_url=None,
         divs = driver.find_elements_by_xpath(
             '//*[@id="accepted-poster-papers"]/ul/li')
     else:
+        first_poster_index = {'2017': 15}
         divs = driver.find_elements_by_class_name('note')[
                :first_poster_index[str(year)]]
     if year < 2022:
@@ -193,8 +192,7 @@ def download_iclr_oral_papers(save_dir, year, base_url=None,
             time_step_in_seconds=time_step_in_seconds,
             downloader=downloader
         )
-        for e in this_error_log:
-            error_log.append(e)
+        error_log.extend(iter(this_error_log))
     driver.close()
     # 2. write error log
     print('write error log')
@@ -306,7 +304,6 @@ def download_iclr_poster_papers(save_dir, year, base_url=None, start_page=1,
             proxy_ip_port=proxy_ip_port
         )
         return
-    first_poster_index = {'2017': 15}
     first_workshop_title = {
         '2017': 'Learning Continuous Semantic Representations of '
                 'Symbolic Expressions'}
@@ -375,8 +372,7 @@ def download_iclr_poster_papers(save_dir, year, base_url=None, start_page=1,
                 time_step_in_seconds=time_step_in_seconds,
                 downloader=downloader
             )
-            for e in this_error_log:
-                error_log.append(e)
+            error_log.extend(iter(this_error_log))
     elif year == 2021:
         divs = driver.find_elements_by_xpath(
             '//*[@id="poster-presentations"]/ul/li')
@@ -386,6 +382,7 @@ def download_iclr_poster_papers(save_dir, year, base_url=None, start_page=1,
         divs = driver.find_elements_by_xpath(
             '//*[@id="accepted-poster-papers"]/ul/li')
     else:
+        first_poster_index = {'2017': 15}
         divs = driver.find_elements_by_class_name('note')[
                first_poster_index[str(year)]:]
     if year < 2022:
@@ -396,8 +393,7 @@ def download_iclr_poster_papers(save_dir, year, base_url=None, start_page=1,
             time_step_in_seconds=time_step_in_seconds,
             downloader=downloader
         )
-        for e in this_error_log:
-            error_log.append(e)
+        error_log.extend(iter(this_error_log))
     driver.close()
     # 2. write error log
     print('write error log')
@@ -438,7 +434,6 @@ def download_iclr_spotlight_papers(save_dir, year, base_url=None,
                        '2020/Conference#accept-spotlight'
         else:
             raise ValueError('the website url is not given for this year!')
-    first_poster_index = {'2017': 15}
     paper_postfix = f'ICLR_{year}'
     error_log = []
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
@@ -505,8 +500,7 @@ def download_iclr_spotlight_papers(save_dir, year, base_url=None,
                 time_step_in_seconds=time_step_in_seconds,
                 downloader=downloader
             )
-            for e in this_error_log:
-                error_log.append(e)
+            error_log.extend(iter(this_error_log))
     elif year == 2021:
         divs = driver.find_elements_by_xpath(
             '//*[@id="spotlight-presentations"]/ul/li')
@@ -514,6 +508,7 @@ def download_iclr_spotlight_papers(save_dir, year, base_url=None,
         divs = driver.find_elements_by_xpath(
             '//*[@id="accept-spotlight"]/ul/li')
     else:
+        first_poster_index = {'2017': 15}
         divs = driver.find_elements_by_class_name('note')[
                :first_poster_index[str(year)]]
     if year < 2022:
@@ -524,8 +519,7 @@ def download_iclr_spotlight_papers(save_dir, year, base_url=None,
             time_step_in_seconds=time_step_in_seconds,
             downloader=downloader
         )
-        for e in this_error_log:
-            error_log.append(e)
+        error_log.extend(iter(this_error_log))
     driver.close()
     # 2. write error log
     print('write error log')

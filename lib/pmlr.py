@@ -72,23 +72,23 @@ def download_paper_given_volume(
             if os.path.exists(this_paper_main_path) and os.path.exists(
                     this_paper_supp_path):
                 continue
-        else:
-            if os.path.exists(this_paper_main_path):
-                continue
+        elif os.path.exists(this_paper_main_path):
+            continue
 
         # get abstract page url
         links = this_paper.find_all('p', {'class': 'links'})[0].find_all('a')
         supp_link = None
         main_link = None
         for link in links:
-            if 'Download PDF' == link.text or 'pdf' == link.text:
+            if link.text in ['Download PDF', 'pdf']:
                 main_link = link.get('href')
-            elif is_download_supplement and \
-                    ('Supplementary PDF' == link.text or
-                     'Supplementary Material' == link.text or
-                     'supplementary' == link.text or
-                     'Supplementary ZIP' == link.text or
-                     'Other Files' == link.text):
+            elif is_download_supplement and link.text in [
+                'Supplementary PDF',
+                'Supplementary Material',
+                'supplementary',
+                'Supplementary ZIP',
+                'Other Files',
+            ]:
                 supp_link = link.get('href')
                 if supp_link[-3:] != 'pdf':
                     this_paper_supp_path = this_paper_supp_path_no_ext + \
@@ -96,7 +96,7 @@ def download_paper_given_volume(
 
         # try 1 time
         # error_flag = False
-        for d_iter in range(1):
+        for _ in range(1):
             try:
                 # download paper with IDM
                 if not os.path.exists(
@@ -108,7 +108,7 @@ def download_paper_given_volume(
                     )
             except Exception as e:
                 # error_flag = True
-                print('Error: ' + title + ' - ' + str(e))
+                print(f'Error: {title} - {str(e)}')
                 error_log.append(
                     (title, main_link, 'main paper download error', str(e)))
             # download supp
@@ -124,7 +124,7 @@ def download_paper_given_volume(
                         )
                     except Exception as e:
                         # error_flag = True
-                        print('Error: ' + title + ' - ' + str(e))
+                        print(f'Error: {title} - {str(e)}')
                         error_log.append((title, supp_link,
                                           'supplement download error', str(e)))
 

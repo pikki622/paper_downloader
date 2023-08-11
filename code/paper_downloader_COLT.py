@@ -37,7 +37,7 @@ def download_paper(year, save_dir, is_download_supplement=False, time_step_in_se
         2012: 23,
         2011: 19
                       }
-    if year in COLT_year_dict.keys():
+    if year in COLT_year_dict:
         volume = f'v{COLT_year_dict[year]}'
     else:
         raise ValueError('''the given year's url is unknown !''')
@@ -62,4 +62,3 @@ if __name__ == '__main__':
         time_step_in_seconds=3,
         downloader='IDM'
     )
-    pass

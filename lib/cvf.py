@@ -42,22 +42,22 @@ def get_paper_dict_list(url=None, content=None, group_name=None, timeout=10):
 
         # get title
         try:
-            if 'dt' == paper.name and 'ptitle' == paper.get('class')[0]:  # title:
+            if paper.name == 'dt' and paper.get('class')[0] == 'ptitle':  # title:
                 title = slugify(paper.text.strip())
                 paper_dict['title'] = title
                 paper_index += 1
                 paper_list_bar.set_description_str(f'Collecting paper {paper_index}: {title}')
-            elif 'dd' == paper.name:
+            elif paper.name == 'dd':
                 all_as = paper.find_all('a')
                 for a in all_as:
-                    if 'pdf' == slugify(a.text.strip()):
+                    if slugify(a.text.strip()) == 'pdf':
                         main_link = urllib.parse.urljoin(url, a.get('href'))
                         paper_dict['main link'] = main_link
                         is_new_paper = True
-                    elif 'supp' == slugify(a.text.strip()):
+                    elif slugify(a.text.strip()) == 'supp':
                         supp_link = urllib.parse.urljoin(url, a.get('href'))
                         paper_dict['supplemental link'] = supp_link
-                    elif 'arxiv' == slugify(a.text.strip()):
+                    elif slugify(a.text.strip()) == 'arxiv':
                         arxiv = urllib.parse.urljoin(url, a.get('href'))
                         paper_dict['arxiv'] = arxiv
                         break

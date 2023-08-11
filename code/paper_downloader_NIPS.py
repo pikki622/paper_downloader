@@ -56,19 +56,16 @@ def save_csv(year):
         num_download = len(paper_list)
         paper_list_bar = tqdm(zip(paper_list, range(num_download)))
         for paper in tqdm(zip(paper_list, range(num_download))):
-            paper_dict = {'title': '',
-                          'main link': '',
-                          'supplemental link': ''}
             # get title
             # print('\n')
             this_paper = paper[0]
             title = slugify(this_paper.a.text)
-            paper_dict['title'] = title
+            paper_dict = {'main link': '', 'supplemental link': '', 'title': title}
             # print('Downloading paper {}/{}: {}'.format(
             # paper[1] + 1, num_download, title))
             paper_list_bar.set_description(
-                'Tracing paper {}/{}: {}'.format(
-                    paper[1] + 1, num_download, title))
+                f'Tracing paper {paper[1] + 1}/{num_download}: {title}'
+            )
 
             # get abstract page url
             url2 = this_paper.a.get('href')
@@ -85,17 +82,17 @@ def save_csv(year):
                     for a in all_a:
                         # print(a.text[:-2])
                         # print(a.text[:-2].strip().lower())
-                        if 'paper' == a.text[:-2].strip().lower():
+                        if a.text[:-2].strip().lower() == 'paper':
                             paper_dict['main link'] = urllib.parse.urljoin(
                                 abs_url, a.get('href'))
-                        elif 'supplemental' == a.text[:-2].strip().lower():
+                        elif a.text[:-2].strip().lower() == 'supplemental':
                             paper_dict['supplemental link'] = \
                                 urllib.parse.urljoin(abs_url, a.get('href'))
                             break
                     break
                 except Exception as e:
                     if i == 2:
-                        print('Error: ' + title + ' - ' + str(e))
+                        print(f'Error: {title} - {str(e)}')
                         if paper_dict['main link'] == '':
                             paper_dict['main link'] = 'error'
                         if paper_dict['supplemental link'] == '':

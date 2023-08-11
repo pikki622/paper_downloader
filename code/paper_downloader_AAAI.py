@@ -36,31 +36,6 @@ def get_track_urls(year):
     dat_file_pathname = os.path.join(
         project_root_folder, 'urls', f'track_archive_url_AAAI_{year}.dat'
     )
-    proceeding_th_dict = {
-        1980: 1,
-        1902: 2,
-        1983: 3,
-        1984: 4,
-        1986: 5,
-        1987: 6,
-        1988: 7,
-        1990: 8,
-        1991: 9,
-        1992: 10,
-        1993: 11,
-        1994: 12,
-        1996: 13,
-        1997: 14,
-        1998: 15,
-        1999: 16,
-        2000: 17,
-        2002: 18,
-        2004: 19,
-        2005: 20,
-        2006: 21,
-        2007: 22,
-        2008: 23
-    }
     if year >= 2023:
         base_url = r'https://ojs.aaai.org/index.php/AAAI/issue/archive'
         headers = {
@@ -80,16 +55,41 @@ def get_track_urls(year):
                 pickle.dump(content, f)
         soup = BeautifulSoup(content, 'html5lib')
         tracks = soup.find('ul', {'class': 'issues_archive'}).find_all('li')
-        track_urls = dict()
+        track_urls = {}
         for tr in tracks:
             h2 = tr.find('h2')
             this_track = slugify(h2.a.text)
             if this_track.startswith(f'aaai-{year-2000}'):
-                this_track += slugify(h2.div.text) + '-' + this_track
+                this_track += f'{slugify(h2.div.text)}-{this_track}'
                 this_url = h2.a.get('href')
                 track_urls[this_track] = this_url
                 print(f'find track: {this_track}({this_url})')
     else:
+        proceeding_th_dict = {
+            1980: 1,
+            1902: 2,
+            1983: 3,
+            1984: 4,
+            1986: 5,
+            1987: 6,
+            1988: 7,
+            1990: 8,
+            1991: 9,
+            1992: 10,
+            1993: 11,
+            1994: 12,
+            1996: 13,
+            1997: 14,
+            1998: 15,
+            1999: 16,
+            2000: 17,
+            2002: 18,
+            2004: 19,
+            2005: 20,
+            2006: 21,
+            2007: 22,
+            2008: 23
+        }
         if year >= 2010:
             proceeding_th = year - 1986
         elif year in proceeding_th_dict:
@@ -116,7 +116,7 @@ def get_track_urls(year):
                 pickle.dump(content, f)
         soup = BeautifulSoup(content, 'html5lib')
         tracks = soup.find('main', {'class': 'content'}).find_all('li')
-        track_urls = dict()
+        track_urls = {}
         for tr in tracks:
             this_track = slugify(tr.a.text)
             this_url = tr.a.get('href')
@@ -579,30 +579,3 @@ if __name__ == '__main__':
     download_from_csv(year, save_dir=f'..\\AAAI_{year}',
                       time_step_in_seconds=5,
                       total_paper_number=total_paper_number)
-    # for year in range(2012, 2018, 2):
-    #     print(year)
-    #     total_paper_number = None
-    #     # total_paper_number = save_csv(year)
-    #     download_from_csv(year, save_dir=f'..\\AAAI_{year}',
-    #                       time_step_in_seconds=10,
-    #                       total_paper_number=total_paper_number)
-    #     time.sleep(2)
-    # for i in range(1, 12):
-    #     print(f'issue {i}/{11}')
-    #     year = 2022
-    #     total_paper_number = save_csv_given_urls(
-    #         urls=f'https://www.aaai.org/Library/AAAI/aaai{year - 2000}-issue{i:0>2}.php',
-    #         csv_filename=f'.\AAAI_{year}_issue_{i}.csv'
-    #     )
-    #     # total_paper_number = 156
-    #     download_from_csv(
-    #         year=year,
-    #         csv_filename=f'.\AAAI_{year}_issue_{i}.csv',
-    #         save_dir=rf'D:\AAAI_{year}',
-    #         time_step_in_seconds=1,
-    #         total_paper_number=total_paper_number)
-
-    # print(get_track_urls(1980))
-    # get_papers_of_track(r'https://ojs.aaai.org/index.php/AAAI/issue/view/548')
-
-    pass
